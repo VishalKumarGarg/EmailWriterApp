@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Email Reply Generator</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 700px;
+            margin: auto;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        select, button {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        #resultBox {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            min-height: 80px;
+        }
+
+        /* LOADING SPINNER */
+        .loader {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #3498db;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            animation: spin 0.8s linear infinite;
+            margin: 15px auto;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #copyBtn {
+            margin-top: 10px;
+            display: none;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #copyBtn:hover {
+            background-color: #45a049;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <h2>Email Reply Generator</h2>
+
+    <label><strong>Enter Original Email:</strong></label>
+    <textarea id="emailContent" placeholder="Type or paste the email here..."></textarea>
+
+    <label><strong>Select Tone:</strong></label>
+    <select id="tone">
+        <option value="">Default (Professional)</option>
+        <option value="professional">Professional</option>
+        <option value="friendly">Friendly</option>
+        <option value="casual">Casual</option>
+    </select>
+
+    <button onclick="generateReply()">Generate Reply</button>
+
+    <div class="loader" id="loader"></div>
+
+    <h3>Generated Reply:</h3>
+    <div id="resultBox">Your reply will appear here...</div>
+
+    <button id="copyBtn" onclick="copyReply()">Copy to Clipboard</button>
+
+    <script>
+        function generateReply() {
+
+            const emailContent = document.getElementById("emailContent").value.trim();
+            const tone = document.getElementById("tone").value;
+
+            if (emailContent === "") {
+                alert("Please enter the original email!");
+                return;
+            }
+
+            const requestData = {
+                emailContent: emailContent,
+                tone: tone
+            };
+
+            // Show loader & hide result
+            document.getElementById("loader").style.display = "block";
+            document.getElementById("resultBox").innerText = "";
+            document.getElementById("copyBtn").style.display = "none";
+
+            // Send Request to Backend
+            fetch("http://localhost:8089/api/email/generator2", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById("loader").style.display = "none";
+                document.getElementById("resultBox").innerText = data;
+                document.getElementById("copyBtn").style.display = "block";
+            })
+            .catch(err => {
+                document.getElementById("loader").style.display = "none";
+                document.getElementById("resultBox").innerText =
+                    "Error communicating with server:\n" + err;
+            });
+        }
+
+        function copyReply() {
+            const text = document.getElementById("resultBox").innerText;
+
+            navigator.clipboard.writeText(text)
+                .then(() => alert("Copied to clipboard!"))
+                .catch(() => alert("Failed to copy!"));
+        }
+    </script>
+
+</body>
+</html>

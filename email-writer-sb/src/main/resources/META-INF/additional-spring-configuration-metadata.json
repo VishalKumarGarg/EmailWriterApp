@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "${GEMINI_API_KEY}",
+  "type": "java.lang.String",
+  "description": "A description for '${GEMINI_API_KEY}'"
+}]}
